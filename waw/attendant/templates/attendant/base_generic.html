@@ -22,7 +22,8 @@
       <div class="col-sm-2">
       {% block sidebar %}
       <ul class="sidebar-nav">
-          
+          <li><a href="/admin">Admin Page</a></li>
+          <li><a href="{% url 'StudentListView' %}">All Students</a></li>
   </ul>
       </ul>
      {% endblock %}
