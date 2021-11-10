@@ -21,7 +21,7 @@ class Absent(models.Model):
         """
         String for representing the Model object.
         """
-        return self.student
+        return '%s' % (self.absent_date)
 
     def get_absolute_url(self):
         """

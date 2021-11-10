@@ -3,10 +3,13 @@
 {% block content %}
 
   <hr/>
-  <p><strong>شماره والدین:</strong> </p>
+  <p>شماره موبایل والدین :  <strong><br/>{{ parent_mobile }}</strong> </p>
+  <p>لیست غیبت ها : </p>
+  {% for absent_info in absent_list %}
+  <p><strong>{{ absent_info }} --- </strong> </p>
+  {% endfor %}
 
-  <p><strong>Absents number : {{ std }}:</strong> </p>
-  <p></p>
+  <p><strong></strong> </p>
   <p><a href="">لیست غیبت ها : </a></p>
 <hr>
   <div style="margin-left:20px;margin-top:20px">

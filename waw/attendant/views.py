@@ -4,10 +4,12 @@ from django.views.generic.base import TemplateView
 import datetime
 from django.urls import reverse
 from django.http import HttpResponseRedirect
-from django.http import Http404
+from django.shortcuts import get_object_or_404
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from . import models
+from . import date_conversion
 from django.views import generic
 from django.shortcuts import render
 # Create your views here.
@@ -32,13 +34,34 @@ class StudentListView(generic.ListView):
 
 
 def StdDetail_view(request, pk):
+  #if student ID is fake handle it
+    absent_date_list = []
     try:
         std = models.Student.objects.get(pk=pk)
-    except models.Student.DoesNotExist:
-        raise Http404("Student does not exist")
-    return render(request, 'attendant/student_detail.html', {'std': std})
+        absent_list = list(models.Absent.objects.filter(
+            student=pk).values_list('absent_type', 'absent_date'))
+        dict = {'parent_mobile': std.parent_mobile,
+                'absent_list': absent_list}
+    except std.DoesNotExist:
+        raise print("Student does not exist")
+    return render(request, 'attendant/student_detail.html', dict)
 
 
 class AbsenttListView(generic.DetailView):
     model = models.Absent
     template_name = "attendant/students_detail.html"
+
+
+def my_view(request):
+    username = request.POST['username']
+    password = request.POST['password']
+    user = authenticate(request, username=username, password=password)
+    if user is not None:
+        login(request, user)
+        # Redirect to a success page.
+        ...
+    else:
+        # Return an 'invalid login' error message.
+        ...
+        error = 'not login'
+        return render(request, 'attendant/login_error.html', {'error': error})
