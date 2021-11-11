@@ -6,12 +6,12 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import permission_required
+from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from . import models
 from . import date_conversion
 from django.views import generic
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 # Create your views here.
 
 
@@ -28,11 +28,12 @@ class Index(TemplateView):
         return context
 
 
-class StudentListView(generic.ListView):
+class StudentListView(LoginRequiredMixin, generic.ListView):
     model = models.Student
     template_name = "attendant/students_list.html"
 
 
+@login_required()
 def StdDetail_view(request, pk):
   #if student ID is fake handle it
     absent_date_list = []

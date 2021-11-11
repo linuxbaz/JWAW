@@ -22,8 +22,15 @@
       <div class="col-sm-2">
       {% block sidebar %}
       <ul class="sidebar-nav">
+          <li><a href="/attendant">Home Page</a></li>
           <li><a href="/admin">Admin Page</a></li>
           <li><a href="{% url 'StudentListView' %}">All Students</a></li>
+          {% if user.is_authenticated %}
+             <li>User:<h5 style="color:green"> {{ user.get_username }}</h5></li>
+             <li><a href="{% url 'logout'%}?next={{request.path}}">Logout</a></li>
+          {% else %}
+             <li><a href="{% url 'login'%}?next={{request.path}}">Login</a></li>
+          {% endif %}
   </ul>
       </ul>
      {% endblock %}
