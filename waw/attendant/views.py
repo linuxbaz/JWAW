@@ -1,3 +1,4 @@
+from .forms import NewAbsentForm
 from django.urls import reverse_lazy
 from django.views.generic.base import TemplateView
 
@@ -9,9 +10,11 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from . import models
+from .forms import AbsentForm
 from . import date_conversion
 from django.views import generic
 from django.shortcuts import render, redirect
+
 # Create your views here.
 
 
@@ -51,6 +54,36 @@ def StdDetail_view(request, pk):
 class AbsenttListView(generic.DetailView):
     model = models.Absent
     template_name = "attendant/students_detail.html"
+
+
+def StudentListLevel_view(request):
+    list = models.Student.objects.filter(student_level=10)
+    dict = {'student_list_level': list}
+    return render(request, 'attendant/students_list_with_level.html', dict)
+
+
+class AbsentCreate(generic.CreateView):
+    model = models.Absent
+    form_class = AbsentForm
+
+
+def get_name(request):
+    # if this is a POST request we need to process the form data
+    if request.method == 'POST':
+        # create a form instance and populate it with data from the request:
+        form = NewAbsentForm(request.POST)
+        # check whether it's valid:
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            # redirect to a new URL:
+            return HttpResponseRedirect('/thanks/')
+
+    # if a GET (or any other method) we'll create a blank form
+    else:
+        form = NewAbsentForm()
+
+    return render(request, 'ceate_absent.html', {'form': form})
 
 
 def my_view(request):

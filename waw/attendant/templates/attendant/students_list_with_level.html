@@ -1,0 +1,19 @@
+{% extends "attendant/base_generic.html" %}
+
+{% block content %}
+    <h1>Students List</h1>
+
+    {% if student_list_level %}
+    <ul>
+
+      {% for student in student_list_level %}
+      <li>
+        <a href="{{ student.get_absolute_url }}">    {{ student.id }}</a> {{student.parent_mobile}})
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}}
+      <p>There are no students.</p>
+    {% endif %}
+
+{% endblock %}
