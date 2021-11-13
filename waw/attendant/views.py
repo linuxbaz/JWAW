@@ -1,3 +1,4 @@
+from django.views.generic.edit import FormView
 from .forms import NewAbsentForm
 from django.urls import reverse_lazy
 from django.views.generic.base import TemplateView
@@ -34,6 +35,7 @@ class Index(TemplateView):
 class StudentListView(LoginRequiredMixin, generic.ListView):
     model = models.Student
     template_name = "attendant/students_list.html"
+    paginate_by = 10
 
 
 @login_required()
@@ -45,10 +47,17 @@ def StdDetail_view(request, pk):
         absent_list = list(models.Absent.objects.filter(
             student=pk).values_list('absent_type', 'absent_date'))
         dict = {'parent_mobile': std.parent_mobile,
-                'absent_list': absent_list}
+                'absent_list': absent_list,
+                'student_id': pk}
     except std.DoesNotExist:
         raise print("Student does not exist")
     return render(request, 'attendant/student_detail.html', dict)
+
+
+@login_required()
+def AbsentDetail_view(request, pk):
+    absent = models.Absent.objects.get(pk=pk)
+    return render(request, 'attendant/absent_detail.html', absent)
 
 
 class AbsenttListView(generic.DetailView):
@@ -62,40 +71,43 @@ def StudentListLevel_view(request):
     return render(request, 'attendant/students_list_with_level.html', dict)
 
 
-class AbsentCreate(generic.CreateView):
-    model = models.Absent
-    form_class = AbsentForm
+def RegNewAbsent_view(request, student_id):
+    #Register New Absent Date for the Student
+    std = models.Student.objects.get(pk=student_id)
+    if request.method == 'POST':
+        form = AbsentForm(request.POST)
+
+        absent_object = models.Absent()
+        absent_object.absent_date = form.absent_date
+        absent_object.absent_type = form.absent_type
+        absent_object.save()
+        return HttpResponseRedirect(reverse('rstudent_10'))
+    else:
+        form = AbsentForm()
+    return render(request, 'attendant/absent_form.html', {'form': form, 'id': student_id})
 
 
-def get_name(request):
+def NewAbsent_view(request, pk):
+
+    std = models.Student.objects.get(pk=pk)
     # if this is a POST request we need to process the form data
     if request.method == 'POST':
         # create a form instance and populate it with data from the request:
-        form = NewAbsentForm(request.POST)
+        form = AbsentForm(request.POST)
         # check whether it's valid:
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
-            # redirect to a new URL:
-            return HttpResponseRedirect('/thanks/')
 
     # if a GET (or any other method) we'll create a blank form
     else:
-        form = NewAbsentForm()
+        form = AbsentForm()
 
     return render(request, 'ceate_absent.html', {'form': form})
 
 
-def my_view(request):
-    username = request.POST['username']
-    password = request.POST['password']
-    user = authenticate(request, username=username, password=password)
-    if user is not None:
-        login(request, user)
-        # Redirect to a success page.
-        ...
-    else:
-        # Return an 'invalid login' error message.
-        ...
-        error = 'not login'
-        return render(request, 'attendant/login_error.html', {'error': error})
+class newAbsent(FormView):
+    form_class = AbsentForm
+    success_url = "/"
+    template_name = "attendant/absent_form.html"
+
+    def form_valid(self, form):
+        form.save()
+        return redirect(self.success_url)

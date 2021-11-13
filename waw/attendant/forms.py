@@ -15,13 +15,9 @@ class AbsentForm(ModelForm):
 
     class Meta:
         model = Absent
-        fields = ['student', 'absent_date', 'absent_type']
-        widgets = {
-            'absent_date': DateInput(),
-        }
+        fields = ['student', 'absent_type', 'absent_date']
 
 
 class NewAbsentForm(forms.Form):
-
     absent_type = forms.CharField(help_text="نوع کلاس :")
     absent_date = forms.DateField(help_text="تاریخ غیبت :")
