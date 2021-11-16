@@ -12,10 +12,13 @@ class DateInput(forms.DateInput):
 
 
 class AbsentForm(ModelForm):
-
+    student=forms.CharField(widget = forms.HiddenInput(), required = False)
     class Meta:
         model = Absent
-        fields = ['student', 'absent_type', 'absent_date']
+        fields = ['absent_type','absent_date']
+        widgets = {
+            'absent_date': DateInput(),
+        }
 
 
 class NewAbsentForm(forms.Form):

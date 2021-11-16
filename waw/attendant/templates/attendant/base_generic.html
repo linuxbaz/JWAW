@@ -25,7 +25,6 @@
           <li><a href="/attendant">Home Page</a></li>
           <li><a href="/admin">Admin Page</a></li>
           <li><a href="{% url 'StudentListView' %}">All Students</a></li>
-            <li><a href="{% url 'student_10' %}">Students</a></li>
 
           {% if user.is_authenticated %}
              <li>User:<h5 style="color:green"> {{ user.get_username }}</h5></li>

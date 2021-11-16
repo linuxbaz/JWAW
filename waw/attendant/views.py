@@ -55,6 +55,22 @@ def StdDetail_view(request, pk):
 
 
 @login_required()
+def RegTodayAbsent_view (request, student_id):
+  #if student ID is fake handle it
+    absent_date_list = []
+    try:
+        std = models.Student.objects.get(pk=student_id)
+        absent_list = list(models.Absent.objects.filter(
+            student=student_id).values_list('absent_type', 'absent_date'))
+        dict = {'parent_mobile': std.parent_mobile,
+                'absent_list': absent_list,
+                'student_id': student_id}
+    except std.DoesNotExist:
+        raise print("Student does not exist")
+    return render(request, 'attendant/student_detail.html', dict)
+
+
+@login_required()
 def AbsentDetail_view(request, pk):
     absent = models.Absent.objects.get(pk=pk)
     return render(request, 'attendant/absent_detail.html', absent)
@@ -65,11 +81,16 @@ class AbsenttListView(generic.DetailView):
     template_name = "attendant/students_detail.html"
 
 
-def StudentListLevel_view(request):
-    list = models.Student.objects.filter(student_level=10)
+def StudentListLevel_view(request, id=10):
+    list = models.Student.objects.filter(student_level=id)
     dict = {'student_list_level': list}
     return render(request, 'attendant/students_list_with_level.html', dict)
 
+class AbsentCreatView(generic.CreateView):
+    model = models.Absent
+    fields = ['student','absent_type','absent_date']
+    template_name ='attendant/absent_form.html'
+    success_url	= reverse_lazy('attendant/index')
 
 def RegNewAbsent_view(request, student_id):
     #Register New Absent Date for the Student
@@ -77,37 +98,12 @@ def RegNewAbsent_view(request, student_id):
     if request.method == 'POST':
         form = AbsentForm(request.POST)
 
-        absent_object = models.Absent()
-        absent_object.absent_date = form.absent_date
-        absent_object.absent_type = form.absent_type
-        absent_object.save()
-        return HttpResponseRedirect(reverse('rstudent_10'))
-    else:
-        form = AbsentForm()
-    return render(request, 'attendant/absent_form.html', {'form': form, 'id': student_id})
-
-
-def NewAbsent_view(request, pk):
-
-    std = models.Student.objects.get(pk=pk)
-    # if this is a POST request we need to process the form data
-    if request.method == 'POST':
-        # create a form instance and populate it with data from the request:
-        form = AbsentForm(request.POST)
-        # check whether it's valid:
-
-    # if a GET (or any other method) we'll create a blank form
-    else:
-        form = AbsentForm()
-
-    return render(request, 'ceate_absent.html', {'form': form})
-
-
-class newAbsent(FormView):
-    form_class = AbsentForm
-    success_url = "/"
-    template_name = "attendant/absent_form.html"
-
-    def form_valid(self, form):
+        new_absent = form.save(commit=False)
+        new_absent.student = std
+        new_absent.save()
         form.save()
-        return redirect(self.success_url)
+
+        return HttpResponseRedirect(reverse('index'))
+    else:
+        form = AbsentForm()
+    return render(request, 'attendant/absent_form.html', {'form': form, 'id': id})
