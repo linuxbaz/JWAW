@@ -28,7 +28,7 @@ class Index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['number_student'] = models.Absent.objects.all().count()
+        context['number_student'] = models.Student.objects.all().count()
         return context
 
 
@@ -41,13 +41,32 @@ class StudentListView(LoginRequiredMixin, generic.ListView):
 @login_required()
 def StdDetail_view(request, pk):
   #if student ID is fake handle it
-    absent_date_list = []
+    absent_tuple_info=((),)
+    counter = 0
     try:
         std = models.Student.objects.get(pk=pk)
-        absent_list = list(models.Absent.objects.filter(
+        absents = list(models.Absent.objects.filter(
             student=pk).values_list('absent_type', 'absent_date'))
+
+        for absent_object in absents:
+            counter +=1
+            year = absent_object[1].strftime('%Y')
+            month = absent_object[1].strftime('%m')
+            day = absent_object[1].strftime('%d')
+            #[dd,mm,dd]
+            l = date_conversion.gregorian_to_jalali(int(year),int(month),int(day))
+            A = [str(x) for x in l ]
+            str_date = " "
+            str_date = str_date.join(A)
+            #Save from the first of tuple instead of second place
+            if counter == 1:
+                absent_tuple_info = ((str_date,absent_object[0]),)
+            else:
+                absent_tuple_info += ((str_date,absent_object[0]),)
+
         dict = {'parent_mobile': std.parent_mobile,
-                'absent_list': absent_list,
+                'absent_tuple_info':absent_tuple_info,
+                'len':len(absent_tuple_info),
                 'student_id': pk}
     except std.DoesNotExist:
         raise print("Student does not exist")
@@ -72,8 +91,17 @@ def RegTodayAbsent_view (request, student_id):
 
 @login_required()
 def AbsentDetail_view(request, pk):
-    absent = models.Absent.objects.get(pk=pk)
-    return render(request, 'attendant/absent_detail.html', absent)
+    absents = models.Absent.objects.get(pk=pk)
+    absent_list_date= []
+    for absent_object in absents:
+        year = absent_object[1].date().strftime('%Y')
+        month = absent_object[1].date().strftime('%m')
+        day = absent_object[1].date().strftime('%d')
+        #[dd,mm,dd]
+        temp_date_list = gregorian_to_jalali(int(year),int(month),int(day))
+        absent_list_date.append(temp_date_list)
+    return render(request, 'attendant/absent_detail.html',
+                  {'objects':absents, 'absent_list_of_student':absent_list_date})
 
 
 class AbsenttListView(generic.DetailView):
@@ -92,6 +120,7 @@ class AbsentCreatView(generic.CreateView):
     template_name ='attendant/absent_form.html'
     success_url	= reverse_lazy('attendant/index')
 
+@login_required()
 def RegNewAbsent_view(request, student_id):
     #Register New Absent Date for the Student
     std = models.Student.objects.get(pk=student_id)
