@@ -8,11 +8,11 @@
 
       {% for student in student_list %}
       <li>
-        <a href="{{ student.get_absolute_url }}">    {{ student.id }}</a> {{student.parent_mobile}})
+        <a href="{{ student.get_absolute_url }}">    {{ student.id }}</a>
       </li>
       {% endfor %}
     </ul>
     {% else %}}
-      <p>There are no books in the Author.</p>
+      <p>There are no students in the Author.</p>
     {% endif %}
 {% endblock %}

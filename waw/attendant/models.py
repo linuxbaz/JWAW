@@ -56,3 +56,5 @@ class Student(models.Model):
         Returns the url to access a particular student instance.
         """
         return reverse('student-detail', args=[str(self.id)])
+class Document(models.Model):
+    docfile = models.FileField(upload_to='documents/%Y/%m/%d')
