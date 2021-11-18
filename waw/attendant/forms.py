@@ -6,12 +6,14 @@ import datetime  # for checking renewal date range.
 from django.forms import ModelForm
 from .models import *
 
+
 class DocumentForm(forms.Form):
     docfile = forms.FileField(
         label='Select a file',
         help_text='max. 42 megabytes'
     )
-    
+
+
 class DateInput(forms.DateInput):
     input_type = 'date'
 
