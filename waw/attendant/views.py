@@ -1,8 +1,7 @@
 from django.views.generic.edit import FormView
-from .forms import NewAbsentForm
 from django.urls import reverse_lazy
 from django.views.generic.base import TemplateView
-
+import requests
 import datetime
 from django.urls import reverse
 from django.http import HttpResponseRedirect
@@ -12,7 +11,7 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required, login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from . import models
-from .forms import AbsentForm, DocumentForm
+from .forms import AbsentForm, DocumentForm, Sent_to_parent_Form
 from . import date_conversion
 from django.views import generic
 from django.shortcuts import render, redirect
@@ -92,15 +91,42 @@ def RegTodayAbsent_view(request, student_id):
     return render(request, 'attendant/student_detail.html', dict)
 
 
-class AbsenttListView(generic.DetailView):
+class AbsentListlView(generic.ListView):
+
     model = models.Absent
-    template_name = "attendant/students_detail.html"
+    template_name = 'attendant/absent_detail.html'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet of all the books
+        context['absent_today_list'] = models.Absent.objects.all()
+        #filter(absent_date=datetime.date.today())
+        return context
 
 
-def StudentListLevel_view(request, id=10):
-    list = models.Student.objects.filter(student_level=id)
-    dict = {'student_list_level': list}
-    return render(request, 'attendant/students_list_with_level.html', dict)
+@login_required()
+def Absent_today_View(request, today=datetime.date.today()):
+    today_list = models.Absent.objects.filter(absent_date=today)
+    yesterday_list = models.Absent.objects.filter(
+        absent_date=today - datetime.timedelta(days=1))
+    #Save parent_phone to a list for sending SMS
+    phones = []
+    if today_list:
+        for p in today_list:
+            phones.append(p.student.parent_mobile)
+    if request.method == 'POST':
+        form = AbsentForm(request.POST)
+        for number in phones:
+            payload = {'Username': 'jaberedu', 'Password': '65361000',
+                       'From': '-1', 'To':  number, 'Text': 'test message'}
+            r = requests.post(
+                'https://www.payam-resan.com/APISend.aspx', params=payload)
+            return render(request, 'attendant/test.html', {'phone': phones,'result': r})
+    else:
+        dict = {'absent_today_list': today_list,
+                'absent_yesterday_list': yesterday_list}
+        return render(request, 'attendant/absent_detail.html', dict)
 
 
 class AbsentCreatView(generic.CreateView):

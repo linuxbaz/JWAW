@@ -29,6 +29,5 @@ class AbsentForm(ModelForm):
         }
 
 
-class NewAbsentForm(forms.Form):
-    absent_type = forms.CharField(help_text="نوع کلاس :")
-    absent_date = forms.DateField(help_text="تاریخ غیبت :")
+class Sent_to_parent_Form(forms.Form):
+    btn = forms.CharField()
