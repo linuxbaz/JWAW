@@ -35,6 +35,9 @@ class Student(models.Model):
     Model representing a student (but not a specific copy of a student).
     """
     id = models.CharField(primary_key=True, max_length=10)
+    student_name = models.CharField(max_length=50, null=True, blank=True)
+    student_parent = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
     input_date = models.DateField(null=True, blank=True)
     parent_mobile = models.CharField(max_length=11)
     LEVEL = (

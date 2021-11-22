@@ -1,8 +1,12 @@
 {% extends "attendant/base_generic.html" %}
 
+
+
 {% block content %}
     <h1>Students List</h1>
-
+    {% if user.is_authenticated %}
+      {{ user.get_username}}
+    {% endif %}
     {% if student_list %}
     <ul>
 

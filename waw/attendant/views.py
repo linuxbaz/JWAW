@@ -106,6 +106,7 @@ class AbsentListlView(generic.ListView):
 
 
 @login_required()
+@permission_required('attendant.can_add_absent', raise_exception=True)
 def Absent_today_View(request, today=datetime.date.today()):
     today_list = models.Absent.objects.filter(absent_date=today)
     yesterday_list = models.Absent.objects.filter(
@@ -122,7 +123,7 @@ def Absent_today_View(request, today=datetime.date.today()):
                        'From': '-1', 'To':  number, 'Text': 'test message'}
             r = requests.post(
                 'https://www.payam-resan.com/APISend.aspx', params=payload)
-            return render(request, 'attendant/test.html', {'phone': phones,'result': r})
+            return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r})
     else:
         dict = {'absent_today_list': today_list,
                 'absent_yesterday_list': yesterday_list}
@@ -172,3 +173,8 @@ def upfile_view(request):
 
     # Render list page with the documents and the form
     return render(request, 'attendant/upfile.html', {'documents': documents, 'form': form})
+
+
+@login_required()
+def userprofile_view(request):
+    return render(request, 'attendant/test.html', {'parents': 'parents'})

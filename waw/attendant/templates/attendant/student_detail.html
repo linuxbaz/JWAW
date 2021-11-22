@@ -22,7 +22,9 @@
   </tr>
   {% endfor %}
   </table>
-<a href="{% url 'reg_today_absent' student_id %}">absent register</a>
+{% if perms.attendant.can_add_absent %}
+<h3><a href="{% url 'reg_today_absent' student_id %}">ثبت غیبت</a></h3>
+{% endif %}
 
 
 

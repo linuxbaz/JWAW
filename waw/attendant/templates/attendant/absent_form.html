@@ -2,15 +2,18 @@
 
 {% block content %}
 
-{% if id %}
-  {{ id }}
-{% endif %}
-<form action="" method="post">
-    {% csrf_token %}
-    <table>
-    {{ form.as_p }}
-    </table>
-    <input type="submit" value="Submit" />
+{% if perms.attendant.can_add_absent %}
+  {% if id %}
+    {{ id }}
+  {% endif %}
+  <form action="" method="post">
+      {% csrf_token %}
+      <table>
+      {{ form.as_p }}
+      </table>
+      <input type="submit" value="Submit" />
 
-</form>
+  </form>
+
+{% endif %}
 {% endblock %}

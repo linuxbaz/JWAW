@@ -6,11 +6,13 @@ from . import models
 
 @admin.register(models.Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'parent_mobile', 'input_date', 'student_level')
+    list_display = ('id', 'parent_mobile', 'input_date',
+                    'student_level', 'student_name', 'student_parent')
 
     fieldsets = (
         (None, {
-            'fields': ('parent_mobile', 'id', 'input_date', 'student_level')
+            'fields': ('parent_mobile', 'id', 'input_date', 'student_level',
+                       'student_name', 'student_parent')
         }),
     )
 

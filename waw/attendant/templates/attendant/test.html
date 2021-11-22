@@ -1,2 +1,6 @@
-{{phone}}
-{{result}}
+
+{% if user.is_authenticated %}
+  {% ifequal user.get_username 'mroot' %}
+    {{ user.groups.all.0 }}
+  {%endifequal %}
+{%endif %}
