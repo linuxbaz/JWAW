@@ -2,7 +2,7 @@
 <html lang="fa">
 <head>
 
-  {% block title %}<title>Local Library</title>{% endblock %}
+  {% block title %}<title>سیسنم انظباطس واو</title>{% endblock %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -13,6 +13,7 @@
   {% load static %}
   <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
+
 </head>
 <body>
 
@@ -21,13 +22,16 @@
     <div class="row">
       <div class="col-sm-2">
       {% block sidebar %}
+      <header class="avatar">
+		<img src="../media/majid228.jpg" />
+    <h2>{{ user.get_username }}</h2>
+  </header>
       <ul class="sidebar-nav">
           <li><a href="/attendant">صفحه نخست</a></li>
           <li><a href="/admin">صفحه مدیر</a></li>
           <li><a href="{% url 'StudentListView' %}">همه دانش آموزان</a></li>
           <li><a href="{% url 'todayAbsent' %}">همه غیبت ها</a></li>
           {% if user.is_authenticated %}
-             <li><p>نام کاربر:</p><h3 style="color:green"> {{ user.get_username }}</h3></li>
              <li><a href="{% url 'logout'%}?next={{request.path}}">خروج</a></li>
           {% else %}
              <li><a href="{% url 'login'%}?next={{request.path}}">ورود</a></li>

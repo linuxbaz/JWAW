@@ -1,22 +1,24 @@
 {% extends "attendant/base_generic.html" %}
 
 
-
 {% block content %}
     <h1>لیست دانش آموزان</h1>
-    {% if user.is_authenticated %}
-      {{ user.get_username}}
-    {% endif %}
     {% if student_list %}
-    <ul>
 
-      {% for student in student_list %}
-      <li>
-        <a href="{{ student.get_absolute_url }}">    {{ student.id }}</a>
-      </li>
-      {% endfor %}
-    </ul>
+    <table class="table_style">
+    <tr>
+      <th>ردیف</th>
+      <th>کد ملی</th>
+    </tr>
+    {% for student in student_list %}
+    <tr>
+      <td><strong>{{ forloop.counter }} </strong></td>
+      <td><a href="{{ student.get_absolute_url }}">    {{ student.id }}</a></td>
+    </tr>
+    {% endfor %}
+    </table>
     {% else %}}
-      <p>There are no students in the Author.</p>
+      <p>هیچ دانش آموزی ثبت نشده</p>
     {% endif %}
+    <ul>
 {% endblock %}

@@ -3,12 +3,20 @@
 {% block content %}
 <h1>WAW</h1>
 
-  <p>خوشامدید <em>سیستم مدیریت موارد انظباطی</em></p>
+  <p style="font-family:ِYekan">خوش آمدید - سیستم مدیریت موارد انطباطی دانش آموزان <strong>واو</strong></p>
 
 <h2>نام مدرسه</h2>
 
-  <ul>
-    <li><strong>تعداد دانش آموزان:</strong> {{ number_student }}</li>
-  </ul>
+<p>لیست غیبت ها : </p>
+<table class="table_style">
+<tr>
+  <th>تعداد دانش آموز</th>
+  <th>درصد غیبت ها</th>
+</tr>
+<tr>
 
+  <td>{{ number_student }}</td>
+  <td>{{ percent_absent }}%</td>
+</tr>
+</table>
 {% endblock %}

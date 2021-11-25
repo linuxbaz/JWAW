@@ -9,4 +9,7 @@ def listToString(s):
 
 # Driver code
 s = ['Geeks', 'for', 'Geeks']
-print(listToString(s)) 
+print(listToString(s))
+
+percent_absent = (34 / (5 * 50))
+print(5 * 50)

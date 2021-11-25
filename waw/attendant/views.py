@@ -29,7 +29,11 @@ class Index(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['number_student'] = models.Student.objects.all().count()
+        n_absent = models.Absent.objects.all().count()
+        n_student = models.Student.objects.all().count()
+        percent_absent = int((n_absent / (n_student * 50))*100)
+        context = {'number_student': n_student,
+                   'percent_absent': percent_absent}
         return context
 
 
@@ -39,7 +43,7 @@ class StudentListView(LoginRequiredMixin, generic.ListView):
     paginate_by = 10
 
 
-@login_required()
+@ login_required()
 def StdDetail_view(request, pk):
   #if student ID is fake handle it
     absent_tuple_info = ((),)
