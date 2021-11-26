@@ -6,11 +6,9 @@
   <p><strong>لیست غیبت ها ی امروز: </strong></p>
 
   {% if absent_today_list %}
-
-  <table border='1'>
+  <table class="table_style">
   <tr>
     <th>ردیف</th>
-    <th>تاریخ</th>
     <th>نوع غیبت</th>
     <th>کد ملی</th>
     <th>ارسال پیام</th>
@@ -18,8 +16,44 @@
     {% for absent in absent_today_list %}
   <tr>
     <td><strong>{{ forloop.counter }} </strong></td>
-    <td>{{ absent.absent_date }}</td>
-    <td>{{ absent.absent_type }}</td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal absent.absent_type  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}
+  </td>
+    <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
+    <td><form method="POST">
+        {% csrf_token %}
+          <input type="submit" name="btn" value="ارسال">
+            </form></td>
+  </tr>
+    {% endfor %}
+
+  </table>
+  {% endif %}
+  <hr/>
+  <p><strong>لیست غیبت ها ی دیروز: </strong></p>
+
+  {% if absent_today_list %}
+
+  <table class="table_style">
+  <tr>
+    <th>ردیف</th>
+    <th>نوع غیبت</th>
+    <th>کد ملی</th>
+    <th>ارسال پیام</th>
+  </tr>
+    {% for absent in absent_yesterday_list %}
+  <tr>
+    <td><strong>{{ forloop.counter }} </strong></td>
+    <td>
+      {% for key, value in absent_type_help_text.items %}
+        {% ifequal absent.absent_type  key %}
+          {{ value }}
+        {% endifequal %}
+      {% endfor %}
+      </td>
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
     <td><form method="POST">
         {% csrf_token %}
@@ -30,32 +64,20 @@
   </table>
   {% endif %}
   <hr/>
-  <p><strong>لیست غیبت ها ی دیروز: </strong></p>
-
-  {% if absent_today_list %}
-
-  <table border='1'>
+  <p>لیست همه غیبت ها : </p>
+  <table class="table_style">
   <tr>
     <th>ردیف</th>
     <th>تاریخ</th>
     <th>نوع غیبت</th>
-    <th>کد ملی</th>
-    <th>ارسال پیام</th>
   </tr>
-    {% for absent in absent_yesterday_list %}
+  {% for val in absent_tuple_info %}
   <tr>
     <td><strong>{{ forloop.counter }} </strong></td>
-    <td>{{ absent.absent_date }}</td>
-    <td>{{ absent.absent_type }}</td>
-    <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
-    <td><form method="POST">
-        {% csrf_token %}
-          <input type="submit" name="btn" value="yes">
-            <input type="submit" name="btn" value="no">
-            </form></td>
+    <td>{{ val.0 }}</td>
+    <td>{{ val.1 }}</td>
   </tr>
-    {% endfor %}
+  {% endfor %}
   </table>
-  {% endif %}
 
 {% endblock %}

@@ -53,22 +53,7 @@ def StdDetail_view(request, pk):
         absents = list(models.Absent.objects.filter(
             student=pk).values_list('absent_type', 'absent_date'))
 
-        for absent_object in absents:
-            counter += 1
-            year = absent_object[1].strftime('%Y')
-            month = absent_object[1].strftime('%m')
-            day = absent_object[1].strftime('%d')
-            #[dd,mm,dd]
-            l = date_conversion.gregorian_to_jalali(
-                int(year), int(month), int(day))
-            A = [str(x) for x in l]
-            str_date = " "
-            str_date = str_date.join(A)
-            #Save from the first of tuple instead of second place
-            if counter == 1:
-                absent_tuple_info = ((str_date, absent_object[0]),)
-            else:
-                absent_tuple_info += ((str_date, absent_object[0]),)
+        absent_tuple_info = date_conversion.to_persion_date(absents)
 
         dict = {'parent_mobile': std.parent_mobile,
                 'absent_tuple_info': absent_tuple_info,
@@ -77,6 +62,40 @@ def StdDetail_view(request, pk):
     except std.DoesNotExist:
         raise print("Student does not exist")
     return render(request, 'attendant/student_detail.html', dict)
+
+
+@login_required()
+@permission_required('attendant.can_add_absent', raise_exception=True)
+def Absent_today_View(request, today=datetime.date.today()):
+    absent_type_help_text = {'n': 'حضوری',
+                             'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
+    today_list = models.Absent.objects.filter(
+        absent_date=today)
+    yesterday_list = models.Absent.objects.filter(
+        absent_date=today - datetime.timedelta(days=1))
+    absents = list(models.Absent.objects.all().values_list(
+        'absent_type', 'absent_date'))
+    absent_tuple_info = date_conversion.to_persion_date(absents)
+    #Save parent_phone to a list for sending SMS
+    phones = []
+    if today_list:
+        for p in today_list:
+            phones.append(p.student.parent_mobile)
+    if request.method == 'POST':
+        form = AbsentForm(request.POST)
+        for number in phones:
+            payload = {'Username': 'jaberedu', 'Password': '65361000',
+                       'From': '-1', 'To':  number, 'Text': 'test message'}
+            r = requests.post(
+                'https://www.payam-resan.com/APISend.aspx', params=payload)
+            return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r})
+    else:
+        dict = {'absent_today_list': today_list,
+                'absent_yesterday_list': yesterday_list,
+                'absent_type_help_text': absent_type_help_text,
+                'absent_tuple_info': absent_tuple_info,
+                'len': len(absent_tuple_info)}
+        return render(request, 'attendant/absent_detail.html', dict)
 
 
 @login_required()
@@ -107,31 +126,6 @@ class AbsentListlView(generic.ListView):
         context['absent_today_list'] = models.Absent.objects.all()
         #filter(absent_date=datetime.date.today())
         return context
-
-
-@login_required()
-@permission_required('attendant.can_add_absent', raise_exception=True)
-def Absent_today_View(request, today=datetime.date.today()):
-    today_list = models.Absent.objects.filter(absent_date=today)
-    yesterday_list = models.Absent.objects.filter(
-        absent_date=today - datetime.timedelta(days=1))
-    #Save parent_phone to a list for sending SMS
-    phones = []
-    if today_list:
-        for p in today_list:
-            phones.append(p.student.parent_mobile)
-    if request.method == 'POST':
-        form = AbsentForm(request.POST)
-        for number in phones:
-            payload = {'Username': 'jaberedu', 'Password': '65361000',
-                       'From': '-1', 'To':  number, 'Text': 'test message'}
-            r = requests.post(
-                'https://www.payam-resan.com/APISend.aspx', params=payload)
-            return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r})
-    else:
-        dict = {'absent_today_list': today_list,
-                'absent_yesterday_list': yesterday_list}
-        return render(request, 'attendant/absent_detail.html', dict)
 
 
 class AbsentCreatView(generic.CreateView):

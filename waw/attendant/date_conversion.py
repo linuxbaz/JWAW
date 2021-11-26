@@ -33,20 +33,22 @@ def gregorian_to_jalali(gy, gm, gd):
 
 
 #Create Report Table Data
-def create_report_data(dict):
-    print(dict)
-    report_data = []
-    str_date = ''
-    for d in dict["data"]:
-        year = d[3].date().strftime('%Y')
-        month = d[3].date().strftime('%m')
-        day = d[3].date().strftime('%d')
+def to_persion_date(absent_list):
+    counter = 0
+    for absent_object in absent_list:
+        counter += 1
+        year = absent_object[1].strftime('%Y')
+        month = absent_object[1].strftime('%m')
+        day = absent_object[1].strftime('%d')
         #[dd,mm,dd]
-        temp_date_list = gregorian_to_jalali(int(year),int(month),int(day))
-        #list date to numeric
-        for dd in temp_date_list:
-            str_date += str(dd)
-        report_data.append([int(str_date),int(d[2])])
-        str_date = ''
-    count_column_list = list(range(1, dict["count"][0]+1))
-    print(report_data)
+        l = gregorian_to_jalali(
+            int(year), int(month), int(day))
+        A = [str(x) for x in l]
+        str_date = " "
+        str_date = str_date.join(A)
+        #Save from the first of tuple instead of second place
+        if counter == 1:
+            absent_tuple_info = ((str_date, absent_object[0]),)
+        else:
+            absent_tuple_info += ((str_date, absent_object[0]),)
+    return absent_tuple_info

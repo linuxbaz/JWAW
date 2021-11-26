@@ -10,12 +10,13 @@ class Absent(models.Model):
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     absent_date = models.DateField()
     ABSENT_TYPE = (
-                    ('n', 'Normal'),
-                    ('v', 'Virtual'),
-                    ('e', 'Exam')
+                    ('n', 'حضوری'),
+                    ('v', 'مجازی'),
+                    ('e', 'امتحان'),
+                    ('d', 'اخراج از کلاس')
                     )
     absent_type = models.CharField(
-                                    max_length=1, choices=ABSENT_TYPE, blank=True, default='N')
+                                    max_length=1, choices=ABSENT_TYPE, blank=True, default='n')
 
     def __str__(self):
         """
