@@ -15,7 +15,8 @@ def gregorian_to_jalali(gy, gm, gd):
   gy2 = gy + 1
  else:
   gy2 = gy
- days = 355666 + (365 * gy) + ((gy2 + 3) // 4) - ((gy2 + 99) // 100) + ((gy2 + 399) // 400) + gd + g_d_m[gm - 1]
+ days = 355666 + (365 * gy) + ((gy2 + 3) // 4) - ((gy2 + 99)
+                                                  // 100) + ((gy2 + 399) // 400) + gd + g_d_m[gm - 1]
  jy = -1595 + (33 * (days // 12053))
  days %= 12053
  jy += 4 * (days // 1461)
@@ -37,9 +38,9 @@ def to_persion_date(absent_list):
     counter = 0
     for absent_object in absent_list:
         counter += 1
-        year = absent_object[1].strftime('%Y')
-        month = absent_object[1].strftime('%m')
-        day = absent_object[1].strftime('%d')
+        year = absent_object.absent_date.strftime('%Y')
+        month = absent_object.absent_date.strftime('%m')
+        day = absent_object.absent_date.strftime('%d')
         #[dd,mm,dd]
         l = gregorian_to_jalali(
             int(year), int(month), int(day))
@@ -48,7 +49,9 @@ def to_persion_date(absent_list):
         str_date = str_date.join(A)
         #Save from the first of tuple instead of second place
         if counter == 1:
-            absent_tuple_info = ((str_date, absent_object[0]),)
+            absent_tuple_info = (
+             (str_date, absent_object.absent_type, absent_object.student),)
         else:
-            absent_tuple_info += ((str_date, absent_object[0]),)
+            absent_tuple_info += ((str_date,
+                                  absent_object.absent_type, absent_object.student),)
     return absent_tuple_info

@@ -3,21 +3,20 @@
 
 {% block content %}
     <h1>لیست دانش آموزان</h1>
-    {% if student_list %}
-
+    {% if students_list %}
     <table class="table_style">
     <tr>
       <th>ردیف</th>
       <th>کد ملی</th>
     </tr>
-    {% for student in student_list %}
+    {% for student in students_list %}
     <tr>
       <td><strong>{{ forloop.counter }} </strong></td>
       <td><a href="{{ student.get_absolute_url }}">    {{ student.id }}</a></td>
     </tr>
     {% endfor %}
     </table>
-    {% else %}}
+    {% else %}
       <p>هیچ دانش آموزی ثبت نشده</p>
     {% endif %}
     <ul>

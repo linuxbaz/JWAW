@@ -23,6 +23,10 @@ from django.template import RequestContext
 # Create your views here.
 
 
+absent_type_help_text = {'n': 'حضوری',
+                         'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
+
+
 class Index(TemplateView):
 
     template_name = "attendant/index.html"
@@ -37,28 +41,36 @@ class Index(TemplateView):
         return context
 
 
-class StudentListView(LoginRequiredMixin, generic.ListView):
-    model = models.Student
-    template_name = "attendant/students_list.html"
-    paginate_by = 10
+@ login_required()
+def StudentListView(request):
+    students_list = []
+    if request.user.groups.filter(name='admins').exists():
+        students_list = list(models.Student.objects.all())
+    else:
+        txt = str(request.user.get_username)
+        uname = txt[61:71]
+        students_list = list(models.Student.objects.filter(id=uname))
+    dict = {'students_list': students_list}
+    return render(request, 'attendant/students_list.html', dict)
 
 
 @ login_required()
 def StdDetail_view(request, pk):
   #if student ID is fake handle it
-    absent_tuple_info = ((),)
+    absent_tuple_info = ()
     counter = 0
+
     try:
         std = models.Student.objects.get(pk=pk)
-        absents = list(models.Absent.objects.filter(
-            student=pk).values_list('absent_type', 'absent_date'))
+        absents = list(models.Absent.objects.filter(student=pk))
 
         absent_tuple_info = date_conversion.to_persion_date(absents)
 
         dict = {'parent_mobile': std.parent_mobile,
                 'absent_tuple_info': absent_tuple_info,
                 'len': len(absent_tuple_info),
-                'student_id': pk}
+                'student_id': pk,
+                'absent_type_help_text': absent_type_help_text}
     except std.DoesNotExist:
         raise print("Student does not exist")
     return render(request, 'attendant/student_detail.html', dict)
@@ -67,15 +79,18 @@ def StdDetail_view(request, pk):
 @login_required()
 @permission_required('attendant.can_add_absent', raise_exception=True)
 def Absent_today_View(request, today=datetime.date.today()):
-    absent_type_help_text = {'n': 'حضوری',
-                             'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
+
     today_list = models.Absent.objects.filter(
         absent_date=today)
     yesterday_list = models.Absent.objects.filter(
         absent_date=today - datetime.timedelta(days=1))
-    absents = list(models.Absent.objects.all().values_list(
-        'absent_type', 'absent_date'))
+    absents = models.Absent.objects.all()
     absent_tuple_info = date_conversion.to_persion_date(absents)
+
+    x = datetime.datetime.now()
+    present = date_conversion.gregorian_to_jalali(x.year, x.month, x.day)
+
+    test_button_name = 'No'
     #Save parent_phone to a list for sending SMS
     phones = []
     if today_list:
@@ -83,18 +98,22 @@ def Absent_today_View(request, today=datetime.date.today()):
             phones.append(p.student.parent_mobile)
     if request.method == 'POST':
         form = AbsentForm(request.POST)
-        for number in phones:
-            payload = {'Username': 'jaberedu', 'Password': '65361000',
-                       'From': '-1', 'To':  number, 'Text': 'test message'}
-            r = requests.post(
-                'https://www.payam-resan.com/APISend.aspx', params=payload)
-            return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r})
+        test_button_name = str((request.POST).keys())[35]
+        index = int(test_button_name)
+        number = phones[index-1]
+
+        payload = {'Username': 'jaberedu', 'Password': '65361000',
+                   'From': '-1', 'To':  number, 'Text': 'test message'}
+        r = requests.post(
+            'https://www.payam-resan.com/APISend.aspx', params=payload)
+        return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r, 'test': test_button_name})
     else:
         dict = {'absent_today_list': today_list,
                 'absent_yesterday_list': yesterday_list,
                 'absent_type_help_text': absent_type_help_text,
                 'absent_tuple_info': absent_tuple_info,
-                'len': len(absent_tuple_info)}
+                'len': len(absent_tuple_info),
+                'today_is': present}
         return render(request, 'attendant/absent_detail.html', dict)
 
 

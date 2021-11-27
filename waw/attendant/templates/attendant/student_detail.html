@@ -3,7 +3,7 @@
 {% block content %}
 
   <hr/>
-
+    {{username}}
   <p>شماره موبایل والدین :  <strong><br/>{{ parent_mobile }}</strong> </p>
 
   <p>لیست غیبت ها : </p>
@@ -17,7 +17,11 @@
   <tr>
     <td><strong>{{ forloop.counter }} </strong></td>
     <td>{{ val.0 }}</td>
-    <td>{{ val.1 }}</td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal val.1  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}</td>
   </tr>
   {% endfor %}
   </table>

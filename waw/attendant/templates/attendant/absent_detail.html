@@ -2,9 +2,9 @@
 
 {% block content %}
 
-
-  <p><strong>لیست غیبت ها ی امروز: </strong></p>
-
+{{test}}
+  <p>  <strong>  لیست غیبت ها ی امروز: </strong></p>
+  <h3>{{today_is}}  : تاریخ </h3>
   {% if absent_today_list %}
   <table class="table_style">
   <tr>
@@ -25,7 +25,7 @@
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
     <td><form method="POST">
         {% csrf_token %}
-          <input type="submit" name="btn" value="ارسال">
+          <input type="submit" name='{{ forloop.counter }}' value="ارسال">
             </form></td>
   </tr>
     {% endfor %}
@@ -75,7 +75,12 @@
   <tr>
     <td><strong>{{ forloop.counter }} </strong></td>
     <td>{{ val.0 }}</td>
-    <td>{{ val.1 }}</td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal val.1  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}
+  </td>
   </tr>
   {% endfor %}
   </table>

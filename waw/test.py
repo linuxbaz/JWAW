@@ -1,3 +1,6 @@
+import datetime
+
+
 def listToString(s):
 
     # initialize an empty string
@@ -11,5 +14,10 @@ def listToString(s):
 s = ['Geeks', 'for', 'Geeks']
 print(listToString(s))
 
-percent_absent = (34 / (5 * 50))
-print(5 * 50)
+
+x = datetime.datetime.now()
+
+print(x.year)
+print(x.strftime("%Y"))
+print(x.strftime("%m"))
+print(x.strftime("%d"))
