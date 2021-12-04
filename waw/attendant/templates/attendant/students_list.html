@@ -8,11 +8,13 @@
     <tr>
       <th>ردیف</th>
       <th>کد ملی</th>
+      <th>نام و نام خانوادگی</th>
     </tr>
     {% for student in students_list %}
     <tr>
       <td><strong>{{ forloop.counter }} </strong></td>
       <td><a href="{{ student.get_absolute_url }}">    {{ student.id }}</a></td>
+      <td>{{ student.student_name }}</td>
     </tr>
     {% endfor %}
     </table>

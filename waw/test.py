@@ -13,11 +13,6 @@ def listToString(s):
 # Driver code
 s = ['Geeks', 'for', 'Geeks']
 print(listToString(s))
-
-
-x = datetime.datetime.now()
-
-print(x.year)
-print(x.strftime("%Y"))
-print(x.strftime("%m"))
-print(x.strftime("%d"))
+my_date = datetime.date.today() + datetime.timedelta(days=1)
+if datetime.date.today() < my_date:
+    print(u"Wrong Date time !")

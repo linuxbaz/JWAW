@@ -18,8 +18,29 @@ class DateInput(forms.DateInput):
     input_type = 'date'
 
 
+class Sent_to_parent_Form(forms.Form):
+    btn = forms.CharField()
+
+
 class AbsentForm(ModelForm):
     student = forms.CharField(widget=forms.HiddenInput(), required=False)
+
+    def __init__(self, *args, **kwargs):
+        super(AbsentForm, self).__init__(*args, **kwargs)
+
+        self.fields['absent_type'].required = True
+        self.fields['absent_date'].required = True
+
+    # def clean(self):
+    #     cleaned_data = super(AbsentForm, self).clean()
+    #     # here all fields have been validated individually,
+    #     # and so cleaned_data is fully populated
+    #     my_date = cleaned_data.get('absent_date')
+    #     if my_date:
+    #         if datetime.date.today() < my_date:
+    #             msg = u"Wrong Date time !"
+    #             self.add_error('absent_date', msg)
+    #     return cleaned_data
 
     class Meta:
         model = Absent
@@ -27,7 +48,3 @@ class AbsentForm(ModelForm):
         widgets = {
             'absent_date': DateInput(),
         }
-
-
-class Sent_to_parent_Form(forms.Form):
-    btn = forms.CharField()

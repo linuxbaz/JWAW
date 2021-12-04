@@ -25,9 +25,9 @@
   </tr>
   {% endfor %}
   </table>
-{% if perms.attendant.can_add_absent %}
+{% ifequal user.groups.all.0.name "managers" %}
 <h3><a href="{% url 'reg_today_absent' student_id %}">ثبت غیبت</a></h3>
-{% endif %}
+{% endifequal %}
 
 
 

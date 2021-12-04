@@ -11,6 +11,7 @@
     <th>ردیف</th>
     <th>نوع غیبت</th>
     <th>کد ملی</th>
+    <th>نام و نام خانوادگی</th>
     <th>ارسال پیام</th>
   </tr>
     {% for absent in absent_today_list %}
@@ -23,6 +24,7 @@
     {% endfor %}
   </td>
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
+    <td>{{ absent.student.student_name}}</td>
     <td><form method="POST">
         {% csrf_token %}
           <input type="submit" name='{{ forloop.counter }}' value="ارسال">

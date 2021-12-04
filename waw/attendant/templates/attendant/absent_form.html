@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{% if perms.attendant.can_add_absent %}
+{% if perms.attendant.add_absent %}
   {% if id %}
     {{ id }}
   {% endif %}

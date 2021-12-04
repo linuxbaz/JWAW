@@ -27,14 +27,6 @@ absent_type_help_text = {'n': 'حضوری',
                          'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
 
 
-def get_user_group(request):
-    if request.user.groups.filter(name='managers').exists():
-        group = 'managers'
-    else:
-        group = 'parents'
-    return group
-
-
 class Index(TemplateView):
 
     template_name = "attendant/index.html"
@@ -51,16 +43,12 @@ class Index(TemplateView):
 
 @ login_required()
 def StudentListView(request):
-
     students_list = []
-
-    if (get_user_group(request) == 'managers'):
-        uid = request.user.id
-        school_id = models.School.objects.filter(school_admin=uid)[0]
-        students_list = list(models.Student.objects.filter(school=school_id))
+    if request.user.groups.filter(name='admins').exists():
+        students_list = list(models.Student.objects.all())
     else:
-        #Parents username is p plus ID that p is deleted to set the ID
-        uname = request.user.username[1:11]
+        txt = str(request.user.get_username)
+        uname = txt[61:71]
         students_list = list(models.Student.objects.filter(id=uname))
     dict = {'students_list': students_list}
     return render(request, 'attendant/students_list.html', dict)
@@ -87,6 +75,7 @@ def StdDetail_view(request, pk):
 
 
 @login_required()
+@permission_required('attendant.can_add_absent', raise_exception=True)
 def Absent_today_View(request, today=datetime.date.today()):
 
     today_list = models.Absent.objects.filter(

@@ -21,15 +21,15 @@ body {
 			width:100px;
 			border-radius:50%;
 			overflow:hidden;
-			border:4px solid @color-1st;
-			box-shadow:0 0 0 4px rgba(255,255,255,0.2);
+			border:4px solid #c83;
+			box-shadow:0 0 0 4px rgba(255,255,255,0.3);
 		}
 
-.avatar	h5{
+.avatar	h4{
 			font-weight:normal;
 			margin-bottom:0;
       font-family: ِYekan;
-			color: red;
+			color: blue;
 		}
 
 .sidebar-nav {
@@ -64,9 +64,10 @@ body {
   width: 50%;
 }
 
-.table_style td, .table_style th {
+.table_style td {
   border: 1px solid #ddd;
   padding: 6px;
+	text-align: center;
 }
 
 .table_style tr:nth-child(even){background-color: #eee;}
