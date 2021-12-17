@@ -1,0 +1,10 @@
+{% extends "attendant/base_generic.html" %}
+
+{% block content %}
+
+<form action="/new-absent/" method="post">
+    {% csrf_token %}
+    {{ form.as_table }}
+    <input type="submit" value="Submit">
+</form>
+{% endblock %}

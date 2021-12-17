@@ -1,0 +1,40 @@
+{% extends "attendant/base_generic.html" %}
+
+{% block content %}
+
+  <hr/>
+    {{username}}
+  <p>شماره موبایل والدین :  <strong><br/>{{ parent_mobile }}</strong> </p>
+
+  <p>لیست غیبت ها : </p>
+  <table class="table_style">
+  <tr>
+    <th>ردیف</th>
+    <th>تاریخ</th>
+    <th>نوع غیبت</th>
+  </tr>
+  {% for val in absent_tuple_info %}
+  <tr>
+    <td><strong>{{ forloop.counter }} </strong></td>
+    <td>{{ val.0 }}</td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal val.1  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}</td>
+  </tr>
+  {% endfor %}
+  </table>
+{% ifequal user.groups.all.0.name "managers" %}
+<h3><a href="{% url 'reg_today_absent' student_id %}">ثبت غیبت</a></h3>
+{% endifequal %}
+
+
+
+<hr>
+  <div style="margin-left:20px;margin-top:20px">
+
+  </div>
+
+
+{% endblock %}

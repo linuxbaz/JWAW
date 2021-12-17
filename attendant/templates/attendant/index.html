@@ -1,0 +1,25 @@
+{% extends "attendant/base_generic.html" %}
+
+{% block content %}
+<h1>WAW</h1>
+
+  <p style="font-family:ِYekan">خوش آمدید - سیستم مدیریت موارد انطباطی دانش آموزان <strong>واو</strong></p>
+
+<h2>نام مدرسه</h2>
+  {% if error %}
+    <h3>{{ error}}</h3>
+  {% else %}
+    <h3>{{ school_name}}</h3>
+    <table class="table_style">
+    <tr>
+      <th>تعداد دانش آموز</th>
+      <th>درصد غیبت ها</th>
+    </tr>
+    <tr>
+
+      <td>{{ number_student }}</td>
+      <td>{{ percent_absent }}%</td>
+    </tr>
+    </table>
+  {% endif %}
+{% endblock %}

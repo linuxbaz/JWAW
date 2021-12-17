@@ -1,0 +1,25 @@
+{% extends "attendant/base_generic.html" %}
+
+
+{% block content %}
+    <h1>لیست دانش آموزان</h1>
+    {% if students_list %}
+    <table class="table_style">
+    <tr>
+      <th>ردیف</th>
+      <th>کد ملی</th>
+      <th>نام و نام خانوادگی</th>
+    </tr>
+    {% for student in students_list %}
+    <tr>
+      <td><strong>{{ forloop.counter }} </strong></td>
+      <td><a href="{{ student.get_absolute_url }}">    {{ student.id }}</a></td>
+      <td>{{ student.student_name }}</td>
+    </tr>
+    {% endfor %}
+    </table>
+    {% else %}
+      <p>هیچ دانش آموزی ثبت نشده</p>
+    {% endif %}
+    <ul>
+{% endblock %}

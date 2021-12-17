@@ -1,0 +1,90 @@
+{% extends "attendant/base_generic.html" %}
+
+{% block content %}
+
+{{test}}
+  <p>  <strong>  لیست غیبت ها ی امروز: </strong></p>
+  <h3>{{today_is}}  : تاریخ </h3>
+  {% if absent_today_list %}
+  <table class="table_style">
+  <tr>
+    <th>ردیف</th>
+    <th>نوع غیبت</th>
+    <th>کد ملی</th>
+    <th>نام و نام خانوادگی</th>
+    <th>ارسال پیام</th>
+  </tr>
+    {% for absent in absent_today_list %}
+  <tr>
+    <td><strong>{{ forloop.counter }} </strong></td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal absent.absent_type  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}
+  </td>
+    <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
+    <td>{{ absent.student.student_name}}</td>
+    <td><form method="POST">
+        {% csrf_token %}
+          <input type="submit" name='{{ forloop.counter }}' value="ارسال">
+            </form></td>
+  </tr>
+    {% endfor %}
+
+  </table>
+  {% endif %}
+  <hr/>
+  <p><strong>لیست غیبت ها ی دیروز: </strong></p>
+
+  {% if absent_yesterday_list %}
+
+  <table class="table_style">
+  <tr>
+    <th>ردیف</th>
+    <th>نوع غیبت</th>
+    <th>کد ملی</th>
+    <th>ارسال پیام</th>
+  </tr>
+    {% for absent in absent_yesterday_list %}
+  <tr>
+    <td><strong>{{ forloop.counter }} </strong></td>
+    <td>
+      {% for key, value in absent_type_help_text.items %}
+        {% ifequal absent.absent_type  key %}
+          {{ value }}
+        {% endifequal %}
+      {% endfor %}
+      </td>
+    <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
+    <td><form method="POST">
+        {% csrf_token %}
+          <input type="submit" name="btn" value="ارسال">
+            </form></td>
+  </tr>
+    {% endfor %}
+  </table>
+  {% endif %}
+  <hr/>
+  <p>لیست همه غیبت ها : </p>
+  <table class="table_style">
+  <tr>
+    <th>ردیف</th>
+    <th>تاریخ</th>
+    <th>نوع غیبت</th>
+  </tr>
+  {% for val in absent_tuple_info %}
+  <tr>
+    <td><strong>{{ forloop.counter }} </strong></td>
+    <td>{{ val.0 }}</td>
+    <td>{% for key, value in absent_type_help_text.items %}
+      {% ifequal val.1  key %}
+        {{ value }}
+      {% endifequal %}
+    {% endfor %}
+  </td>
+  </tr>
+  {% endfor %}
+  </table>
+
+{% endblock %}
