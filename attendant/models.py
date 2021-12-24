@@ -9,6 +9,7 @@ from datetime import date
 class Absent(models.Model):
     student = models.ForeignKey('Student', on_delete=models.CASCADE)
     absent_date = models.DateField()
+    sent = models.BooleanField(default=False)
     ABSENT_TYPE = (
                     ('n', 'حضوری'),
                     ('v', 'مجازی'),
@@ -110,6 +111,12 @@ class Student(models.Model):
         Returns the url to access a particular student instance.
         """
         return reverse('student-detail', args=[str(self.id)])
+
+
+class Like(models.Model):
+    student = models.ForeignKey(
+        'Student', on_delete=models.SET_NULL, null=True, blank=True)
+    date_send = models.DateField(null=True, blank=True)
 
 
 class Document(models.Model):

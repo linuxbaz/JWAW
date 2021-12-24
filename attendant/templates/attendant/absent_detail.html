@@ -25,10 +25,9 @@
   </td>
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
     <td>{{ absent.student.student_name}}</td>
-    <td><form method="POST">
-        {% csrf_token %}
-          <input type="submit" name='{{ forloop.counter }}' value="ارسال">
-            </form></td>
+    <td>
+      <a class="likebutton" id="like{{absent.student}}" href="#" data-catid="{{absent.student}}">Like</a>
+    </td>
   </tr>
     {% endfor %}
 
@@ -57,10 +56,9 @@
       {% endfor %}
       </td>
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
-    <td><form method="POST">
-        {% csrf_token %}
-          <input type="submit" name="btn" value="ارسال">
-            </form></td>
+    <td>
+      <a class="likebutton" id="like{{absent.student}}" href="#" data-catid="{{absent.student}}">Like</a>
+    </td>
   </tr>
     {% endfor %}
   </table>
@@ -87,4 +85,24 @@
   {% endfor %}
   </table>
 
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.0/jquery.min.js"></script>
+  <script type="text/javascript">
+  $('.likebutton').click(function(){
+  var catid;
+  catid = $(this).attr("data-catid");
+  $.ajax(
+  {
+      type:"GET",
+      url: "likestudent/",
+      data:{
+               student_id: catid
+      },
+      success: function( data )
+      {
+          $( '#like'+ catid ).remove();
+          $( '#message' ).text(data);
+      }
+   })
+  });
+  </script>
 {% endblock %}

@@ -5,6 +5,7 @@ import requests
 import datetime
 from django.urls import reverse
 from django.http import HttpResponseRedirect
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from django.contrib.auth import authenticate, login
@@ -16,13 +17,55 @@ from . import date_conversion
 from django.views import generic
 from django.shortcuts import render, redirect
 from django.template import RequestContext
+from rest_framework import viewsets
+from .serializers import StudentSerializer
+from rest_framework import generics, permissions
+
+# Create Restful View here.
+
+from rest_framework.test import APITestCase
+from django.contrib.auth.models import User
+from rest_framework import status
+from django.contrib import messages
+
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from .serializers import UserSerializer
+from django.contrib.auth.models import User
+
+#test
+
+
+class UserCreate(APIView):
+    """
+    Creates the user.
+    """
+
+    def post(self, request, format='json'):
+        return Response('hello')
+
+
+class UserCreate(APIView):
+    """
+    Creates the user.
+    """
+
+    def post(self, request, format='json'):
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            if user:
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class StudentView(viewsets.ModelViewSet):
+    queryset = models.Student.objects.all()
+    serializer_class = StudentSerializer
+
 
 # Create your views here.
-
-
-# Create your views here.
-
-
+today = datetime.date.today()
 absent_type_help_text = {'n': 'حضوری',
                          'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
 
@@ -103,10 +146,13 @@ def StdDetail_view(request, pk):
     return render(request, 'attendant/student_detail.html', dict)
 
 
+"""
+    Report for absent
+"""
+
+
 @login_required()
 def Absent_today_View(request):
-
-    today = datetime.date.today()
     yesterday = today - datetime.timedelta(days=1)
     absent_tuple_info = ()
 
@@ -115,7 +161,7 @@ def Absent_today_View(request):
         school_info = get_info_of__school(request)
 
     today_list = models.Absent.objects.filter(
-        absent_date=today).filter(student__in=school_info['id_list'])
+        absent_date=today).filter(student__in=school_info['id_list']).filter(sent=False)
 
     yesterday_list = models.Absent.objects.filter(
         absent_date=yesterday).filter(student__in=school_info['id_list'])
@@ -129,29 +175,40 @@ def Absent_today_View(request):
 
     test_button_name = 'No'
     #Save parent_phone to a list for sending SMS
-    phones = []
-    if today_list:
-        for p in today_list:
-            phones.append(p.student.parent_mobile)
-    if request.method == 'POST':
-        form = AbsentForm(request.POST)
-        test_button_name = str((request.POST).keys())[35]
-        index = int(test_button_name)
-        number = phones[index-1]
+    dict = {'absent_today_list': today_list,
+            'absent_yesterday_list': yesterday_list,
+            'absent_type_help_text': absent_type_help_text,
+            'absent_tuple_info': absent_tuple_info,
+            'len': len(absent_tuple_info),
+            'today_is': present}
+    return render(request, 'attendant/absent_detail.html', dict)
 
+
+"""
+    Send SMS to parent
+"""
+
+
+def likeStudent(request):
+    if request.method == 'GET':
+        student_id = request.GET['student_id']
+        likedstudent = models.Student.objects.get(
+            pk=student_id)  # getting the liked student
         payload = {'Username': 'jaberedu', 'Password': '65361000',
-                   'From': '-1', 'To':  number, 'Text': 'test message'}
+                   'From': '-1', 'To':  likedstudent.parent_mobile, 'Text': 'test message'}
         r = requests.post(
             'https://www.payam-resan.com/APISend.aspx', params=payload)
-        return render(request, 'attendant/sms_result.html', {'phone': phones, 'result': r, 'test': test_button_name})
+        # Creating Like Object
+        m = models.Like(student=likedstudent, date_send=today)
+        m.save()  # saving it to store in database
+
+        #Flag sent True
+        m = models.Absent.objects.get(student=student_id, absent_date=today)
+        m.sent = True
+        m.save()
+        return HttpResponse("Success!")  # Sending an success response
     else:
-        dict = {'absent_today_list': today_list,
-                'absent_yesterday_list': yesterday_list,
-                'absent_type_help_text': absent_type_help_text,
-                'absent_tuple_info': absent_tuple_info,
-                'len': len(absent_tuple_info),
-                'today_is': present}
-        return render(request, 'attendant/absent_detail.html', dict)
+        return HttpResponse("Request method is not a GET")
 
 
 @login_required()
@@ -168,20 +225,6 @@ def RegTodayAbsent_view(request, student_id):
     except std.DoesNotExist:
         raise print("Student does not exist")
     return render(request, 'attendant/student_detail.html', dict)
-
-
-class AbsentListlView(generic.ListView):
-
-    model = models.Absent
-    template_name = 'attendant/absent_detail.html'
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet of all the books
-        context['absent_today_list'] = models.Absent.objects.all()
-        #filter(absent_date=datetime.date.today())
-        return context
 
 
 class AbsentCreatView(generic.CreateView):
