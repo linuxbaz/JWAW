@@ -29,7 +29,7 @@
       <ul class="sidebar-nav">
           <li><a href="/attendant">صفحه نخست</a></li>
           <li><a href="/admin">صفحه مدیر</a></li>
-          <li><a href="{% url 'StudentListView' %}">همه دانش آموزان</a></li>
+          <li><a href="{% url 'StudentListView' base=0 %}">همه دانش آموزان</a></li>
           <li><a href="{% url 'todayAbsent' %}">همه غیبت ها</a></li>
           {% if user.is_authenticated %}
              <li><a href="{% url 'logout'%}?next={{request.path}}">خروج</a></li>

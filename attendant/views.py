@@ -7,6 +7,7 @@ from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+import simplejson as json
 
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import permission_required, login_required
@@ -81,15 +82,22 @@ def get_user_group(request):
 
 
 def get_info_of__school(request):
-    id_list = []
+    id_list = []  # students whobelong to the specified school
     uid = request.user.id
     school_id = models.School.objects.filter(school_admin=uid)[0]
     school_name = models.School.objects.filter(
         id=school_id).values_list('school_name')[0]
+    school_study_code_list = models.School.objects.filter(
+        id=school_id).values_list('studyfield_code_list')[0]
+    school_study_name_list = models.School.objects.filter(
+        id=school_id).values_list('studyfield_name_list')[0]
     students_list = models.Student.objects.filter(school_id=school_id)
     for std in students_list:
         id_list.append(std.id)
-    school_info = {'id_list': id_list, 'school_name': school_name}
+    school_info = {'id_list': id_list, 'school_name': school_name,
+                   'school_study_code_list': school_study_code_list,
+                   'school_study_name_list': school_study_name_list,
+                   }
     return school_info
 
 
@@ -112,18 +120,46 @@ def Index(request):
 
 
 @ login_required()
-def StudentListView(request):
-
+def StudentListView(request, base=0):
+    students_list = []
     if (get_user_group(request) == 'managers'):
         school_info = get_info_of__school(request)
-        students_list = models.Student.objects.all().filter(
-            id__in=school_info['id_list'])
+    # Make List studyfields of School by converting string to list
+        str_studycode_tuple = ''.join(
+            school_info['school_study_code_list'][0])
+
+        str = '['+str_studycode_tuple+']'
+        jsonDec = json.decoder.JSONDecoder()
+        StudyFieldCode_list = jsonDec.decode(str)
+        StudyFieldName_list = (
+            school_info['school_study_name_list'][0]).split(",")
+        # Pair of code and name of field Convert to dictionary.
+        zip_iterator = zip(StudyFieldCode_list, StudyFieldName_list)
+        dict_studyfields = dict(zip_iterator)
+    # If the manager go to filters
+        if request.method == 'POST':
+            filter_field = (request.POST['filter_field'])
+            filter_base = (request.POST['filter_base'])
+            students_list = models.Student.objects.filter(
+                id__in=school_info['id_list']).filter(
+                    student_level=filter_base).filter(
+                    studyfield_code=filter_field)
+
+        else:  # all Student are listed for by base 0
+            if base == '0':
+                students_list = models.Student.objects.filter(
+                    id__in=school_info['id_list'])
+            else:  # If linke base in html page clicked
+                students_list = models.Student.objects.filter(
+                    id__in=school_info['id_list']).filter(student_level=base)
     else:
         #Parents username is p plus ID that p is deleted to set the ID
         uname = request.user.username[1:11]
         students_list = list(models.Student.objects.filter(id=uname))
-    dict = {'students_list': students_list}
-    return render(request, 'attendant/students_list.html', dict)
+    context = {'students_list': students_list,
+               'fieldcode_list': dict_studyfields
+               }
+    return render(request, 'attendant/students_list.html', context)
 
 
 @ login_required()
@@ -209,6 +245,12 @@ def likeStudent(request):
         return HttpResponse("Success!")  # Sending an success response
     else:
         return HttpResponse("Request method is not a GET")
+
+#list Student using Ajax in template
+
+
+def LoadStudentFromBase(request):
+    pass
 
 
 @login_required()

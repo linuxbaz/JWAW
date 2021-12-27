@@ -10,13 +10,13 @@ admin.site.register(models.Like)
 
 @admin.register(models.Student)
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('id', 'parent_mobile', 'input_date',
+    list_display = ('id',  'studyfield_code', 'studyfield_name', 'parent_mobile', 'input_date',
                     'student_level', 'student_name', 'school')
 
     fieldsets = (
         (None, {
-            'fields': ('parent_mobile', 'id', 'input_date', 'student_level',
-                       'student_name', 'school')
+            'fields': ('id', 'studyfield_code', 'studyfield_name', 'parent_mobile', 'input_date',
+                       'student_level', 'student_name', 'school')
         }),
     )
 
@@ -34,25 +34,5 @@ class AbsentAdmin(admin.ModelAdmin):
 
 
 @admin.register(models.School)
-class AbsentAdmin(admin.ModelAdmin):
-    model = models.Absent
-    list_display = ('id', 'school_admin', 'school_name', 'school_address')
-
-    fieldsets = (
-        (None, {
-            'fields': ('id', 'school_admin', 'school_name', 'school_address')
-        }),
-    )
-
-
-@admin.register(models.Classroom)
-class AbsentAdmin(admin.ModelAdmin):
-    model = models.Absent
-    list_display = ('school', 'id', 'classroom_name',
-                    'classroom_field', 'classroom_level')
-
-    fieldsets = (
-        (None, {
-            'fields': ('school', 'id', 'classroom_name', 'classroom_field', 'classroom_level')
-        }),
-    )
+class SchoolAdmin(admin.ModelAdmin):
+    model = models.School
