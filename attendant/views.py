@@ -24,40 +24,40 @@ from rest_framework import generics, permissions
 
 # Create Restful View here.
 
-from rest_framework.test import APITestCase
-from django.contrib.auth.models import User
-from rest_framework import status
-from django.contrib import messages
-
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from .serializers import UserSerializer
-from django.contrib.auth.models import User
+# from rest_framework.test import APITestCase
+# from django.contrib.auth.models import User
+# from rest_framework import status
+# from django.contrib import messages
+#
+#
+# from rest_framework.views import APIView
+# from rest_framework.response import Response
+# from .serializers import UserSerializer
+# from django.contrib.auth.models import User
 
 #test
 
 
-class UserCreate(APIView):
-    """
-    Creates the user.
-    """
-
-    def post(self, request, format='json'):
-        return Response('hello')
-
-
-class UserCreate(APIView):
-    """
-    Creates the user.
-    """
-
-    def post(self, request, format='json'):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            if user:
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+# class UserCreate(APIView):
+#     """
+#     Creates the user.
+#     """
+#
+#     def post(self, request, format='json'):
+#         return Response('hello')
+#
+#
+# class UserCreate(APIView):
+#     """
+#     Creates the user.
+#     """
+#
+#     def post(self, request, format='json'):
+#         serializer = UserSerializer(data=request.data)
+#         if serializer.is_valid():
+#             user = serializer.save()
+#             if user:
+#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class StudentView(viewsets.ModelViewSet):
@@ -67,8 +67,28 @@ class StudentView(viewsets.ModelViewSet):
 
 # Create your views here.
 today = datetime.date.today()
-absent_type_help_text = {'n': 'حضوری',
-                         'v': 'مجازی', 'e': 'امتحان', 'd': 'اخراج از کلاس'}
+absent_type_help_text = {
+                            'n': 'غیبت حضوری',
+                            'v': 'غیبت مجازی',
+                            'e': 'غیبت امتحان',
+                            'd': 'اخراج از کلاس',
+                            'd': 'تاخیر در کلاس ',
+                            'd': 'فرار از مدرسه',
+                            'd': 'بی انظباطی',
+                            }
+
+
+def listToString(s):
+
+    # initialize an empty string
+    str1 = ""
+
+    # traverse in the string
+    for ele in s:
+        str1 += str(ele)
+
+    # return string
+    return str1
 
 
 def get_user_group(request):
@@ -113,7 +133,7 @@ def Index(request):
         percent_absent = int((n_absent / (n_student * 50))*100)
         context = {'number_student': n_student,
                    'percent_absent': percent_absent,
-                   'school_name': school_info['school_name']}
+                   'school_name': school_info['school_name'][0]}
     else:
         context = {'error': 'لطفا با نام کاربری وارد شوید'}
     return render(request, 'attendant/index.html', context)
@@ -133,7 +153,7 @@ def StudentListView(request, base=0):
         StudyFieldCode_list = jsonDec.decode(str)
         StudyFieldName_list = (
             school_info['school_study_name_list'][0]).split(",")
-        # Pair of code and name of field Convert to dictionary.
+        # Pair of code and name of field Convert to a dictionary.
         zip_iterator = zip(StudyFieldCode_list, StudyFieldName_list)
         dict_studyfields = dict(zip_iterator)
     # If the manager go to filters
@@ -227,22 +247,39 @@ def Absent_today_View(request):
 
 def likeStudent(request):
     if request.method == 'GET':
-        student_id = request.GET['student_id']
+        data_text = request.GET['data_text']
+        #convert to list that [0] is student_id and [1] is absent_id
+        data_list = data_text.split(",")
+        #Make prameters for SMS
+        student_id = data_list[0]
+        absent_id = data_list[1]
+        x = datetime.datetime.now()
+        perion_date = date_conversion.gregorian_to_jalali(
+            x.year, x.month, x.day)
+
+        absent_type = models.Absent.objects.filter(
+            id=absent_id).values_list("absent_type")[0]
+        #get absent_type for making SMS
+        sms = "هنرستان جابر این حیان:سلام والدین گرامی "+"فرزند شما در تاریخ " + \
+            listToString(perion_date)+" "+" " + \
+            absent_type_help_text[absent_type[0]]+" "+" داشته است"
+
         likedstudent = models.Student.objects.get(
             pk=student_id)  # getting the liked student
-        payload = {'Username': 'jaberedu', 'Password': '65361000',
-                   'From': '-1', 'To':  likedstudent.parent_mobile, 'Text': 'test message'}
+        payload = {'Username': 'jaberedu', 'Password': '36318513',
+                   'From': '-1', 'To':  likedstudent.parent_mobile, 'Text': sms}
         r = requests.post(
             'https://www.payam-resan.com/APISend.aspx', params=payload)
         # Creating Like Object
         m = models.Like(student=likedstudent, date_send=today)
         m.save()  # saving it to store in database
 
-        #Flag sent True
-        m = models.Absent.objects.get(student=student_id, absent_date=today)
+        #Flag sent of Absent object True
+        m = models.Absent.objects.get(id=absent_id)
         m.sent = True
         m.save()
-        return HttpResponse("Success!")  # Sending an success response
+        # Sending an success response
+        return HttpResponse(r)
     else:
         return HttpResponse("Request method is not a GET")
 

@@ -2,7 +2,7 @@
 
 {% block content %}
 
-{{test}}
+<p id="message"></p>
   <p>  <strong>  لیست غیبت ها ی امروز: </strong></p>
   <h3>{{today_is}}  : تاریخ </h3>
   {% if absent_today_list %}
@@ -26,7 +26,7 @@
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
     <td>{{ absent.student.student_name}}</td>
     <td>
-      <a class="likebutton" id="like{{absent.student}}" href="#" data-catid="{{absent.student}}">Like</a>
+      <a class="likebutton" id="like{{absent.student}}" href="#" studentid_absentid="{{absent.student}},{{absent.id}}">ارسال</a>
     </td>
   </tr>
     {% endfor %}
@@ -43,7 +43,6 @@
     <th>ردیف</th>
     <th>نوع غیبت</th>
     <th>کد ملی</th>
-    <th>ارسال پیام</th>
   </tr>
     {% for absent in absent_yesterday_list %}
   <tr>
@@ -56,9 +55,6 @@
       {% endfor %}
       </td>
     <td><a href="{{ absent.student.get_absolute_url }}">{{ absent.student}}</a></td>
-    <td>
-      <a class="likebutton" id="like{{absent.student}}" href="#" data-catid="{{absent.student}}">Like</a>
-    </td>
   </tr>
     {% endfor %}
   </table>
@@ -89,17 +85,17 @@
   <script type="text/javascript">
   $('.likebutton').click(function(){
   var catid;
-  catid = $(this).attr("data-catid");
+  studentid_absentid = $(this).attr("studentid_absentid");
   $.ajax(
   {
       type:"GET",
       url: "likestudent/",
       data:{
-               student_id: catid
+               data_text : studentid_absentid
       },
       success: function( data )
       {
-          $( '#like'+ catid ).remove();
+          $( '#like'+ studentid_absentid ).remove();
           $( '#message' ).text(data);
       }
    })

@@ -11,10 +11,13 @@ class Absent(models.Model):
     absent_date = models.DateField()
     sent = models.BooleanField(default=False)
     ABSENT_TYPE = (
-                    ('n', 'حضوری'),
-                    ('v', 'مجازی'),
-                    ('e', 'امتحان'),
-                    ('d', 'اخراج از کلاس')
+                    ('n', 'غیبت حضوری'),
+                    ('v', 'غیبت مجازی'),
+                    ('e', 'غیبت امتحان'),
+                    ('d', 'اخراج از کلاس'),
+                    ('d', 'تاخیر در کلاس '),
+                    ('d', 'فرار از مدرسه'),
+                    ('d', 'بی انظباطی')
                     )
     absent_type = models.CharField(
                                     max_length=1, choices=ABSENT_TYPE, blank=True, default='n')

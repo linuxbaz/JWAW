@@ -24,11 +24,11 @@ class StudentAdmin(admin.ModelAdmin):
 @admin.register(models.Absent)
 class AbsentAdmin(admin.ModelAdmin):
     model = models.Absent
-    list_display = ('student', 'absent_type', 'absent_date')
+    list_display = ('student', 'absent_type', 'absent_date', 'sent')
 
     fieldsets = (
         (None, {
-            'fields': ('student', 'absent_type', 'absent_date')
+            'fields': ('student', 'absent_type', 'absent_date', 'sent')
         }),
     )
 

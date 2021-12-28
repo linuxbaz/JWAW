@@ -2,29 +2,32 @@
 
 
 {% block content %}
+{{code_list}}
+<h1>لیست دانش آموزان</h1>
 
 <form method="post" action="{% url 'StudentListView' 0 %}">
   {% csrf_token %}
   <select name='filter_field'>
-    <option value="0">همه</option>
     {% for key , value in fieldcode_list.items %}
     <option value="{{key}}">{{value}}</option>
     {% endfor %}
   </select>
   <select name='filter_base'>
-    <option value="0">همه</option>
     <option value="10">10</option>
     <option value="11">11</option>
     <option value="12">12</option>
   </select>
-  <input type="submit" value="Select">
+  <input type="submit" value="فیلتر">
 </form>
-    <h1>لیست دانش آموزان</h1>
+
+<hr/>
+<div class="filter">
     <ul>
-      <li><a class="likebase" id="eleven" href="{% url 'StudentListView' base=10 %}" base_cat="10">دهم</a></li>
-      <li><a class="likebase" id="eleven" href="{% url 'StudentListView' base=11 %}" base_cat="11">یازدهم</a></li>
-      <li><a class="linkbase" id="twelve" href="{% url 'StudentListView' base=12 %}" base_cat="12">دوازدهم</a></li>
+      <li><a  id="eleven" href="{% url 'StudentListView' base=10 %}" base_cat="10">دهم</a></li>
+      <li><a  id="eleven" href="{% url 'StudentListView' base=11 %}" base_cat="11">یازدهم</a></li>
+      <li><a  id="twelve" href="{% url 'StudentListView' base=12 %}" base_cat="12">دوازدهم</a></li>
       </ul>
+</div>
     {% if students_list %}
     <table class="table_style">
     <tr>

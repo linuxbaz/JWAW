@@ -31,10 +31,13 @@ class AbsentForm(ModelForm):
         self.fields['absent_type'].required = True
         self.fields['absent_date'].required = True
 
-
     class Meta:
         model = Absent
         fields = ['absent_type', 'absent_date']
+        labels = {
+            "absent_type": "نوع غیبت",
+            "absent_date": "تاریخ"
+        }
         widgets = {
             'absent_date': DateInput(),
         }

@@ -22,6 +22,6 @@ urlpatterns = [
     path('students_list/<base>', views.StudentListView, name='StudentListView'),
     path('profile/', views.userprofile_view, name='userprofile'),
     #path('', include(router.urls)),
-    path('api/users/', views.UserCreate.as_view(), name='account-create'),
+    #path('api/users/', views.UserCreate.as_view(), name='account-create'),
     path('likestudent/', views.likeStudent, name='likestudent'),
     ]

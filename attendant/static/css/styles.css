@@ -12,6 +12,56 @@
 body {
   background-color: #ddd;
 }
+
+.form_container {
+  border-radius: 5px;
+  background-color: #eee;
+  padding: 20px;
+}
+.p_id{
+	color:#d00;
+}
+input[type=submit] {
+  background-color: #009;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.a_absent_reg {
+  background-color: #009;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+
+}
+.a_absent_reg:hover {background-color: #900;}
+
+input[type=submit]:hover {background-color: #900;}
+.filter{
+	background-color: white;
+}
+.filter li {
+	display: inline-block;
+	padding : 10px;
+}
+.filter a{
+  background-color: #009; /* Green */
+  border: none;
+  color: white;
+  padding: 5px 5px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+	border-radius: 2px;
+}
+.filter li a:hover {background-color: #d00;}
 .avatar{
 		background:rgba(0,0,0,0.1);
 		padding:2em 0.5em;
