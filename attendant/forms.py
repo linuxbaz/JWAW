@@ -1,10 +1,9 @@
 from django import forms
-
 from django.core.exceptions import ValidationError
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 import datetime
 from django.forms import ModelForm
-from .models import *
+from attendant.models import *
 
 
 class DocumentForm(forms.Form):
@@ -29,15 +28,15 @@ class AbsentForm(ModelForm):
         super(AbsentForm, self).__init__(*args, **kwargs)
 
         self.fields['absent_type'].required = True
-        self.fields['absent_date'].required = True
 
     class Meta:
         model = Absent
-        fields = ['absent_type', 'absent_date']
+        fields = ['absent_type','course', 'absent_detail']
         labels = {
             "absent_type": "نوع غیبت",
-            "absent_date": "تاریخ"
+            "course": 'عنوان کلاس',
+            "absent_detail": 'شرح بی انظباطی',
         }
-        widgets = {
-            'absent_date': DateInput(),
-        }
+        # widgets = {
+        #     'absent_date': DateInput(),
+        # }

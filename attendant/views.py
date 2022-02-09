@@ -1,85 +1,67 @@
-from django.views.generic.edit import FormView
-from django.urls import reverse_lazy
-from django.views.generic.base import TemplateView
 import requests
 import datetime
+import simplejson as json
+from django.urls import reverse_lazy
 from django.urls import reverse
 from django.http import HttpResponseRedirect
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
-import simplejson as json
-
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import permission_required, login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from . import models
-from .forms import AbsentForm, DocumentForm, Sent_to_parent_Form
-from . import date_conversion
+from django.contrib.auth.decorators import login_required
+from attendant import models
+from attendant.forms import AbsentForm, DocumentForm, Sent_to_parent_Form
+from attendant import date_conversion
 from django.views import generic
-from django.shortcuts import render, redirect
-from django.template import RequestContext
-from rest_framework import viewsets
-from .serializers import StudentSerializer
-from rest_framework import generics, permissions
-
-# Create Restful View here.
-
-# from rest_framework.test import APITestCase
-# from django.contrib.auth.models import User
-# from rest_framework import status
-# from django.contrib import messages
-#
-#
-# from rest_framework.views import APIView
-# from rest_framework.response import Response
-# from .serializers import UserSerializer
-# from django.contrib.auth.models import User
-
-#test
+from django.shortcuts import render
 
 
-# class UserCreate(APIView):
-#     """
-#     Creates the user.
-#     """
-#
-#     def post(self, request, format='json'):
-#         return Response('hello')
-#
-#
-# class UserCreate(APIView):
-#     """
-#     Creates the user.
-#     """
-#
-#     def post(self, request, format='json'):
-#         serializer = UserSerializer(data=request.data)
-#         if serializer.is_valid():
-#             user = serializer.save()
-#             if user:
-#                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+from django.http import JsonResponse
 
 
-class StudentView(viewsets.ModelViewSet):
-    queryset = models.Student.objects.all()
-    serializer_class = StudentSerializer
+from django.contrib.auth.models import User, Group
+from csv import reader
+
+import csv
+
+from django.contrib.auth.models import Permission
+
+
+def userdata(request):
+    with open('attendant/users_file.csv', 'r') as csv_file:
+        csvf = reader(csv_file)
+        data = []
+        for username, password, *__ in csvf:
+            u = models.User()
+            u.password = 'Abc1234'
+            u.is_superuser = "0"
+            u.username = username
+            u.date_joined = "2018-09-27 05:14:50"
+            u.save()
+            usr = User.objects.get(username=username)
+            permission = Permission.objects.get(name='Can view absent')
+            usr.user_permissions.add(permission)
+            permission = Permission.objects.get(name='Can view student')
+            usr.user_permissions.add(permission)
+            my_group = Group.objects.get(name='parents')
+            my_group.user_set.add(usr)
+            usr.set_password('raw_password')
+            usr.save()
+            data.append('user :'+username+'is built')
+    return render(request, 'attendant/test.html', {'data': data})
 
 
 # Create your views here.
 today = datetime.date.today()
 absent_type_help_text = {
-                            'n': 'غیبت حضوری',
-                            'v': 'غیبت مجازی',
-                            'e': 'غیبت امتحان',
-                            'd': 'اخراج از کلاس',
-                            'd': 'تاخیر در کلاس ',
-                            'd': 'فرار از مدرسه',
-                            'd': 'بی انظباطی',
-                            }
+    'n': 'غیبت حضوری',
+    'v': 'غیبت مجازی',
+    'e': 'غیبت امتحان',
+    'd': 'اخراج از کلاس',
+    'd': 'تاخیر در کلاس ',
+    'd': 'فرار از مدرسه',
+    'd': 'بی انظباطی',
+}
 
 
 def listToString(s):
-
     # initialize an empty string
     str1 = ""
 
@@ -98,7 +80,8 @@ def get_user_group(request):
         group = 'parents'
     return group
 
-#Get name and school's student from user who logins
+
+# Get name and school's student from user who logins
 
 
 def get_info_of__school(request):
@@ -121,7 +104,6 @@ def get_info_of__school(request):
     return school_info
 
 
-@login_required
 def Index(request):
     if (get_user_group(request) == 'managers'):
         context = {}
@@ -130,7 +112,7 @@ def Index(request):
             student__in=school_info['id_list']).count()
         n_student = models.Student.objects.all().filter(
             id__in=school_info['id_list']).count()
-        percent_absent = int((n_absent / (n_student * 50))*100)
+        percent_absent = int((n_absent / (n_student * 50)) * 100)
         context = {'number_student': n_student,
                    'percent_absent': percent_absent,
                    'school_name': school_info['school_name'][0]}
@@ -139,16 +121,16 @@ def Index(request):
     return render(request, 'attendant/index.html', context)
 
 
-@ login_required()
+@login_required()
 def StudentListView(request, base=0):
     students_list = []
     if (get_user_group(request) == 'managers'):
         school_info = get_info_of__school(request)
-    # Make List studyfields of School by converting string to list
+        # Make List studyfields of School by converting string to list
         str_studycode_tuple = ''.join(
             school_info['school_study_code_list'][0])
 
-        str = '['+str_studycode_tuple+']'
+        str = '[' + str_studycode_tuple + ']'
         jsonDec = json.decoder.JSONDecoder()
         StudyFieldCode_list = jsonDec.decode(str)
         StudyFieldName_list = (
@@ -156,14 +138,14 @@ def StudentListView(request, base=0):
         # Pair of code and name of field Convert to a dictionary.
         zip_iterator = zip(StudyFieldCode_list, StudyFieldName_list)
         dict_studyfields = dict(zip_iterator)
-    # If the manager go to filters
+        # If the manager go to filters
         if request.method == 'POST':
             filter_field = (request.POST['filter_field'])
             filter_base = (request.POST['filter_base'])
             students_list = models.Student.objects.filter(
                 id__in=school_info['id_list']).filter(
-                    student_level=filter_base).filter(
-                    studyfield_code=filter_field)
+                student_level=filter_base).filter(
+                studyfield_code=filter_field)
 
         else:  # all Student are listed for by base 0
             if base == '0':
@@ -173,7 +155,7 @@ def StudentListView(request, base=0):
                 students_list = models.Student.objects.filter(
                     id__in=school_info['id_list']).filter(student_level=base)
     else:
-        #Parents username is p plus ID that p is deleted to set the ID
+        # Parents username is p plus ID that p is deleted to set the ID
         uname = request.user.username[1:11]
         students_list = list(models.Student.objects.filter(id=uname))
     context = {'students_list': students_list,
@@ -182,9 +164,9 @@ def StudentListView(request, base=0):
     return render(request, 'attendant/students_list.html', context)
 
 
-@ login_required()
+@login_required()
 def StdDetail_view(request, pk):
-  #if student ID is fake handle it
+    # if student ID is fake handle it
     absent_tuple_info = ()
     dict = {}
     counter = 0
@@ -212,7 +194,7 @@ def Absent_today_View(request):
     yesterday = today - datetime.timedelta(days=1)
     absent_tuple_info = ()
 
-    #Go to specific school with find school_id value
+    # Go to specific school with find school_id value
     if (get_user_group(request) == 'managers'):
         school_info = get_info_of__school(request)
 
@@ -230,7 +212,7 @@ def Absent_today_View(request):
     present = date_conversion.gregorian_to_jalali(x.year, x.month, x.day)
 
     test_button_name = 'No'
-    #Save parent_phone to a list for sending SMS
+    # Save parent_phone to a list for sending SMS
     dict = {'absent_today_list': today_list,
             'absent_yesterday_list': yesterday_list,
             'absent_type_help_text': absent_type_help_text,
@@ -248,9 +230,9 @@ def Absent_today_View(request):
 def likeStudent(request):
     if request.method == 'GET':
         data_text = request.GET['data_text']
-        #convert to list that [0] is student_id and [1] is absent_id
+        # convert to list that [0] is student_id and [1] is absent_id
         data_list = data_text.split(",")
-        #Make prameters for SMS
+        # Make prameters for SMS
         student_id = data_list[0]
         absent_id = data_list[1]
         x = datetime.datetime.now()
@@ -259,22 +241,22 @@ def likeStudent(request):
 
         absent_type = models.Absent.objects.filter(
             id=absent_id).values_list("absent_type")[0]
-        #get absent_type for making SMS
-        sms = "هنرستان جابر این حیان:سلام والدین گرامی "+"فرزند شما در تاریخ " + \
-            listToString(perion_date)+" "+" " + \
-            absent_type_help_text[absent_type[0]]+" "+" داشته است"
+        # get absent_type for making SMS
+        sms = "هنرستان جابر این حیان:سلام والدین گرامی " + "فرزند شما در تاریخ " + \
+              listToString(perion_date) + " " + " " + \
+              absent_type_help_text[absent_type[0]] + " " + " داشته است"
 
         likedstudent = models.Student.objects.get(
             pk=student_id)  # getting the liked student
         payload = {'Username': 'jaberedu', 'Password': '36318513',
-                   'From': '-1', 'To':  likedstudent.parent_mobile, 'Text': sms}
+                   'From': '-1', 'To': likedstudent.parent_mobile, 'Text': sms}
         r = requests.post(
             'https://www.payam-resan.com/APISend.aspx', params=payload)
         # Creating Like Object
         m = models.Like(student=likedstudent, date_send=today)
         m.save()  # saving it to store in database
 
-        #Flag sent of Absent object True
+        # Flag sent of Absent object True
         m = models.Absent.objects.get(id=absent_id)
         m.sent = True
         m.save()
@@ -283,7 +265,8 @@ def likeStudent(request):
     else:
         return HttpResponse("Request method is not a GET")
 
-#list Student using Ajax in template
+
+# list Student using Ajax in template
 
 
 def LoadStudentFromBase(request):
@@ -292,7 +275,7 @@ def LoadStudentFromBase(request):
 
 @login_required()
 def RegTodayAbsent_view(request, student_id):
-  #if student ID is fake handle it
+    # if student ID is fake handle it
     absent_date_list = []
     try:
         std = models.Student.objects.get(pk=student_id)
@@ -315,13 +298,15 @@ class AbsentCreatView(generic.CreateView):
 
 @login_required()
 def RegNewAbsent_view(request, student_id):
-    #Register New Absent Date for the Student
+    # Register New Absent Date for the Student
     std = models.Student.objects.get(pk=student_id)
     if request.method == 'POST':
         form = AbsentForm(request.POST)
 
         new_absent = form.save(commit=False)
         new_absent.student = std
+        new_absent.absent_date = today
+        new_absent.sent = 0
         new_absent.save()
         form.save()
 

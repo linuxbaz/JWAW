@@ -39,10 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'attendant.apps.AttendantConfig',
-    'rest_framework',
-    'knox',
-    "rest_framework.authtoken",
+    'attendant.apps.AttendantConfig'
 ]
 
 MIDDLEWARE = [

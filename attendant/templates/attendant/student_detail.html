@@ -4,9 +4,10 @@
 
   <hr/>
     {{username}}
-  <p>شماره موبایل والدین :  <p class="p_id"><br/>{{ parent_mobile }}</p> </p>
+  <p>شماره موبایل والدین :  <strong><br/>{{ parent_mobile }}</strong> </p>
 
   <p>لیست غیبت ها : </p>
+  {{absents}}
   <table class="table_style">
   <tr>
     <th>ردیف</th>
@@ -26,7 +27,8 @@
   {% endfor %}
   </table>
 {% ifequal user.groups.all.0.name "managers" %}
-<a class="a_absent_reg" href="{% url 'reg_today_absent' student_id %}">ثبت غیبت</a>
+<br/>
+<h3><a href="{% url 'reg_today_absent' student_id %}">ثبت غیبت</a></h3>
 {% endifequal %}
 
 
